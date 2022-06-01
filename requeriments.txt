@@ -1,0 +1,7 @@
+bs4
+requests
+selenium
+openpyxl
+systools
+unidecode
+webdriver_manager
