@@ -31,7 +31,8 @@ VERY_LONG_TIMEOUT = 120
 EPROC_TJSC = '0033'
 EPROC_JFSC = '7208'
 timeout = [SHORT_TIMEOUT,LONG_TIMEOUT,VERY_LONG_TIMEOUT]
-DOWNLOADS_DIR = '/home/ricardo/Insync/ricardo_rp04@hotmail.com/OneDrive/pgmjud/eProc-TJSC-JFSC-webscraper/processos/'
+DOWNLOADS_DIR = os.getcwd() + '/downloads/'
+PROCESSOS_DIR = os.getcwd() + '/processos/'
 chrome_options = Options()
 chrome_options.add_experimental_option('prefs',  {
     "download.default_directory": DOWNLOADS_DIR,
@@ -104,11 +105,11 @@ def download_inicial(proc):
         pass
     # 0307204-50.2018.8.24.0033
     try:
-        driver.find_element(By.XPATH, "// a[contains(text(), 'INIC1')]").click()
+        driver.find_element(By.XPATH, "// a[equals(text(), 'INIC1')]").click()
         print('INIC1')
     except:
         try:
-            driver.find_element(By.XPATH, "// a[contains(text(), 'PET1')]").click()
+            driver.find_element(By.XPATH, "// a[equals(text(), 'PET1')]").click()
             print('PET1')
         except:
             return False
@@ -116,5 +117,18 @@ def download_inicial(proc):
     driver.switch_to.frame('conteudoIframe')
     driver.find_element(By.TAG_NAME, 'button').click()
     driver.close()
-    driver.switch_to.window(driver.window_handles[-1])
+    driver.switch_to.window(driver.window_handles[0])
+    sleep(1)
+    i = 0
+    while os.listdir(DOWNLOADS_DIR) == []:
+        sleep(1)
+        i += 1
+        if i > 10:
+            return False
+    while not os.listdir(DOWNLOADS_DIR)[0].endswith('.pdf'):
+        sleep(1)
+        i += 1
+        if i > 20:
+            return False
+    os.rename(DOWNLOADS_DIR + os.listdir(DOWNLOADS_DIR)[0], PROCESSOS_DIR + proc + '.pdf')
     return True

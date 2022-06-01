@@ -33,12 +33,18 @@ def main():
 
     user = arguments[1]
     password = arguments[2]
-    processo = arguments[3]
+    # processo = arguments[3]
 
     drive_init('tjsc')
     eproc_login(user, password)
-    search(processo)
-    download_inicial(processo)
+
+    f = open("procs.txt", "r")
+    processos = f.readlines()
+    f.close()
+    for processo in processos:
+        processo = processo.split(' ')[0]
+        search(processo)
+        download_inicial(processo)
 
     sleep(1000000)
 
