@@ -129,5 +129,5 @@ dmypy.json
 .pyre/
 
 # Pasta de processos
-processos/
-downloads/
+processos/*
+downloads/*

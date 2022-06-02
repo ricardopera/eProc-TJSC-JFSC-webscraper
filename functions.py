@@ -33,7 +33,11 @@ EPROC_JFSC = '7208'
 timeout = [SHORT_TIMEOUT,LONG_TIMEOUT,VERY_LONG_TIMEOUT]
 DOWNLOADS_DIR = os.getcwd() + '/downloads/'
 PROCESSOS_DIR = os.getcwd() + '/processos/'
+HEADLESS = True
 chrome_options = Options()
+if HEADLESS:
+    chrome_options.add_argument("--headless")
+# chrome_options.add_argument('window-size=1920,1080')
 chrome_options.add_experimental_option('prefs',  {
     "download.default_directory": DOWNLOADS_DIR,
     "download.prompt_for_download": False,
@@ -41,19 +45,24 @@ chrome_options.add_experimental_option('prefs',  {
     "plugins.always_open_pdf_externally": True
     })
 print('12')
-# service=Service(r'/opt/apps/cn.google.chrome/files/chrome')
-driver = webdriver.Chrome(options = chrome_options, service=Service(ChromeDriverManager(version='83.0.4103.14').install()))
+# service = Service(ChromeDriverManager(version='83.0.4103.14').install())
+service = Service(ChromeDriverManager().install())
+driver = webdriver.Chrome(options = chrome_options, service=service)
+driver.set_window_size(1920, 1080)
+# driver.maximize_window()
 print('13')
 driver.window_handles
 main_window = driver.current_window_handle
+
 
 def drive_init(tribunal):
     sleep(1)
     if tribunal == 'tjsc':
         driver.get('https://eproc1g.tjsc.jus.br/eproc/')
-        # driver.get('www.google.com.br')
+        # driver.maximize_window()
     else:
         driver.get('https://eproc.jfsc.jus.br/eprocV2/')
+        # driver.maximize_window()
 
 def eproc_login(username, password):
     sleep(1)
@@ -71,31 +80,19 @@ def get_procs():
     return content
 
 def search(proc):
-    ok = False
     driver.find_element_by_name('txtNumProcessoPesquisaRapida').send_keys(proc)
     sleep(0.5)
     driver.find_element_by_name('txtNumProcessoPesquisaRapida').send_keys(Keys.ENTER)
-    sleep(1)   
+    WebDriverWait(driver, LONG_TIMEOUT).until(EC.presence_of_element_located((By.XPATH, "// a[text()='Árvore']")))
+    # sleep(2)   
     try:
         driver.find_element_by_link_text('Árvore')          
     except NoSuchElementException:
-        error_log(proc)
+        # error_log(proc)
         print("Processo não encontrado:",proc)
+        return False
     else:
-        # sleep(3)
-        ok = True
-        # docs = driver.find_elements(By.CLASS_NAME, 'infraLinkDocumento')
-        # for doc in docs:
-        #     if 'INIC1' in doc.text:
-        #         doc.click()
-        #         sleep(1)
-        #         break
-        # driver.switch_to.window(driver.window_handles[-1])
-        # driver.switch_to.frame('conteudoIframe')
-        # driver.find_element(By.TAG_NAME, 'button').click()
-        # driver.close()
-        # driver.switch_to.window(driver.window_handles[-1])
-    return ok
+        return True
 
 def download_inicial(proc):
     try:
@@ -105,17 +102,20 @@ def download_inicial(proc):
         pass
     # 0307204-50.2018.8.24.0033
     try:
-        driver.find_element(By.XPATH, "// a[equals(text(), 'INIC1')]").click()
-        print('INIC1')
+        driver.find_element(By.XPATH, "// a[text()='INIC1']").click()
+        print('INIC1', proc)
     except:
         try:
-            driver.find_element(By.XPATH, "// a[equals(text(), 'PET1')]").click()
-            print('PET1')
+            driver.find_element(By.XPATH, "// a[text()='PET1']").click()
+            print('PET1', proc)
         except:
+            print('Petição inicial não encontrada, processo:',proc)
             return False
     driver.switch_to.window(driver.window_handles[-1])
+    # sleep(5)
     driver.switch_to.frame('conteudoIframe')
-    driver.find_element(By.TAG_NAME, 'button').click()
+    if not HEADLESS:
+        driver.find_element(By.TAG_NAME, 'button').click()
     driver.close()
     driver.switch_to.window(driver.window_handles[0])
     sleep(1)

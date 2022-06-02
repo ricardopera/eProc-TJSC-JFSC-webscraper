@@ -43,10 +43,13 @@ def main():
     f.close()
     for processo in processos:
         processo = processo.split(' ')[0]
+        if processo+'.pdf' in listdir(PROCESSOS_DIR):
+            print('Já baixou o processo '+processo)
+            continue
         search(processo)
         download_inicial(processo)
 
-    sleep(1000000)
+    sleep(10)
 
 
 
