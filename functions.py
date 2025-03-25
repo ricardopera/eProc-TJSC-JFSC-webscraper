@@ -33,7 +33,7 @@ EPROC_JFSC = '7208'
 timeout = [SHORT_TIMEOUT,LONG_TIMEOUT,VERY_LONG_TIMEOUT]
 DOWNLOADS_DIR = os.getcwd() + '/downloads/'
 PROCESSOS_DIR = os.getcwd() + '/processos/'
-HEADLESS = True
+HEADLESS = False
 chrome_options = Options()
 if HEADLESS:
     chrome_options.add_argument("--headless")
@@ -66,10 +66,10 @@ def drive_init(tribunal):
 
 def eproc_login(username, password):
     sleep(1)
-    driver.find_element_by_id('txtUsuario').send_keys(username)
-    driver.find_element_by_id('pwdSenha').send_keys(password)
+    driver.find_element(By.ID, 'txtUsuario').send_keys(username)
+    driver.find_element(By.ID, 'pwdSenha').send_keys(password)
     sleep(1)
-    driver.find_element_by_id('sbmEntrar').click()
+    driver.find_element(By.ID, 'sbmEntrar').click()
     sleep(3) 
 
 def get_procs():
@@ -80,13 +80,13 @@ def get_procs():
     return content
 
 def search(proc):
-    driver.find_element_by_name('txtNumProcessoPesquisaRapida').send_keys(proc)
+    driver.find_element(By.NAME, 'txtNumProcessoPesquisaRapida').send_keys(proc)
     sleep(0.5)
-    driver.find_element_by_name('txtNumProcessoPesquisaRapida').send_keys(Keys.ENTER)
+    driver.find_element(By.NAME, 'txtNumProcessoPesquisaRapida').send_keys(Keys.ENTER)
     WebDriverWait(driver, LONG_TIMEOUT).until(EC.presence_of_element_located((By.XPATH, "// a[text()='Árvore']")))
     # sleep(2)   
     try:
-        driver.find_element_by_link_text('Árvore')          
+        driver.find_element(By.LINK_TEXT, 'Árvore')          
     except NoSuchElementException:
         # error_log(proc)
         print("Processo não encontrado:",proc)
